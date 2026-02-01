@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ТЕПЛО</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Переменные темы */
+            --bg-color: #f0f3f8;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #2d3436;
+            --text-sec: #636e72;
+            
+            --primary: #6c5ce7; 
+            --primary-dark: #5849be;
+            --accent: #00cec9;
+            --success: #00b894;
+            --danger: #ff7675;
+            
+            --shadow-out: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 1);
+            --shadow-in: inset 4px 4px 8px rgba(163, 177, 198, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 1);
+            --shadow-hover: 8px 8px 16px rgba(163, 177, 198, 0.7), -8px -8px 16px rgba(255, 255, 255, 1);
+            
+            --radius: 20px;
+            --font-main: 'Montserrat', sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #212529;
+            --card-bg: rgba(44, 48, 52, 0.95);
+            --text-main: #f1f3f5;
+            --text-sec: #adb5bd;
+            --primary: #a29bfe; 
+            --primary-dark: #847cdf;
+            --shadow-out: 5px 5px 10px rgba(0,0,0,0.5), -4px -4px 10px rgba(255,255,255,0.05);
+            --shadow-in: inset 4px 4px 8px rgba(0,0,0,0.5), inset -3px -3px 8px rgba(255,255,255,0.05);
+            --shadow-hover: 7px 7px 14px rgba(0,0,0,0.6), -4px -4px 10px rgba(255,255,255,0.08);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            margin: 0; padding: 0 0 110px 0;
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            transition: background 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* --- UI COMPONENTS --- */
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-out);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s;
+        }
+
+        h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+        h2 { font-size: 1.3rem; margin-bottom: 15px; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* --- BUTTONS --- */
+        button { border: none; cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .btn {
+            padding: 14px 20px; border-radius: 16px;
+            background: var(--bg-color); color: var(--text-main);
+            box-shadow: var(--shadow-out);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .btn:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+        .btn:active { transform: scale(0.95); box-shadow: var(--shadow-in); }
+        
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-circle { width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 1.2rem; }
+
+        /* --- INPUTS --- */
+        input, select {
+            width: 100%; padding: 15px; border-radius: 16px; border: none;
+            background: var(--bg-color); color: var(--text-main);
+            box-shadow: var(--shadow-in); margin-bottom: 15px;
+            font-size: 1rem; font-family: inherit; appearance: none;
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.01); backdrop-filter: blur(12px);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.8rem; font-weight: 900; color: var(--text-main); letter-spacing: 1px; }
+
+        /* --- TABS --- */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+
+        /* --- TASK LIST --- */
+        .task-card {
+            background: var(--bg-color); border-radius: 16px; padding: 16px;
+            margin-bottom: 12px; box-shadow: var(--shadow-out);
+            border-left: 6px solid transparent; transition: 0.3s;
+        }
+        .task-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .task-title { font-weight: 600; font-size: 1.05rem; flex: 1; margin-left: 12px; }
+        .task-done-text { text-decoration: line-through; opacity: 0.6; }
+        
+        .subtasks-container {
+            margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.05);
+            display: none; animation: slideDown 0.3s ease;
+        }
+        .subtask-item { display: flex; align-items: center; margin-top: 10px; font-size: 0.9rem; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 10px; }
+        
+        /* --- CHART BARS --- */
+        .chart-container { height: 180px; display: flex; align-items: flex-end; justify-content: space-between; gap: 4px; padding-top: 20px; }
+        .bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; align-items: center; }
+        .bar { width: 80%; border-radius: 8px 8px 0 0; min-height: 4px; transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .bar-label { font-size: 0.65rem; margin-top: 6px; color: var(--text-sec); text-align: center; }
+
+        /* --- STREAK BADGE --- */
+        .streak-card {
+            background: linear-gradient(135deg, #FF9966, #FF5E62);
+            color: white; text-align: center; padding: 15px; border-radius: 20px;
+            margin-bottom: 20px; box-shadow: 0 10px 20px rgba(255, 94, 98, 0.3);
+        }
+
+        /* --- NAV BAR --- */
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 450px;
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex; justify-content: space-around; padding: 10px; z-index: 999;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-sec); opacity: 0.6; transition: 0.3s;
+            width: 55px; height: 55px; border-radius: 20px;
+        }
+        .nav-item.active { opacity: 1; color: var(--primary); background: rgba(108, 92, 231, 0.1); transform: translateY(-5px); }
+        .nav-icon { font-size: 1.5rem; margin-bottom: 2px; }
+
+        /* --- MODALS --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .modal-content { background: var(--bg-color); width: 90%; max-width: 400px; padding: 30px; border-radius: 30px; box-shadow: var(--shadow-out); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .date-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 15px; scrollbar-width: none; }
+    </style>
+</head>
+<body data-theme="light">
+
+<header>
+    <div class="logo">ТЕПЛО</div>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn btn-circle" onclick="app.ui.toggleModal('settings-modal')">⚙️</button>
+    </div>
+</header>
+
+<div id="tab-stats" class="container tab-content active">
+    
+    <div class="streak-card">
+        <div style="font-size: 3rem; font-weight: 900;" id="streak-count">0</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">дней подряд ты в потоке 🔥</div>
+    </div>
+
+    <div class="card">
+        <div class="date-filters">
+            <button class="btn active" onclick="app.stats.setPeriod('today', this)" style="padding: 10px 15px;">Сегодня</button>
+            <button class="btn" onclick="app.stats.setPeriod('week', this)" style="padding: 10px 15px;">Неделя</button>
+            <button class="btn" onclick="app.stats.setPeriod('month', this)" style="padding: 10px 15px;">Месяц</button>
+        </div>
+        <h3 id="stats-period-label" style="text-align: center; color: var(--text-sec); font-size: 0.9rem;">Сегодня</h3>
+    </div>
+
+    <div class="card">
+        <h2>⚡ Энергия</h2>
+        <div class="chart-container" id="energy-chart"></div>
+        <div style="text-align: center; margin-top: 15px; font-weight: 600;">Всего баллов: <span id="total-points" style="color: var(--primary);">0</span></div>
+    </div>
+
+    <div class="card">
+        <h2>📊 Финансы (<span class="currency-symbol">$</span>)</h2>
+        <div class="chart-container" id="finance-chart"></div>
+        <div style="display: flex; justify-content: space-around; margin-top: 15px; font-weight: 600;">
+            <span style="color: var(--success)">+ <span id="total-inc">0</span></span>
+            <span style="color: var(--danger)">- <span id="total-exp">0</span></span>
+        </div>
+    </div>
+</div>
+
+<div id="tab-tasks" class="container tab-content">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <button class="btn btn-circle" onclick="app.tasks.changeDay(-1)">◀</button>
+            <h3 id="current-date-display">Сегодня</h3>
+            <button class="btn btn-circle" onclick="app.tasks.changeDay(1)">▶</button>
+        </div>
+
+        <input type="text" id="new-task-text" placeholder="Я хочу сделать..." onkeypress="if(event.key==='Enter') app.tasks.add()">
+        <div style="display: flex; gap: 10px;">
+            <select id="new-task-cat">
+                <option value="Работа">💼 Работа</option>
+                <option value="Тело">💪 Тело</option>
+                <option value="Фокус">🧠 Фокус</option>
+                <option value="Быт">🏠 Быт</option>
+            </select>
+            <button class="btn btn-primary" onclick="app.tasks.add()">+</button>
+        </div>
+    </div>
+
+    <div id="tasks-list"></div>
+</div>
+
+<div id="tab-income" class="container tab-content">
+    <div class="card">
+        <h2>💰 Доход</h2>
+        <input type="number" id="inc-amount" placeholder="Сумма" inputmode="decimal">
+        <select id="inc-cat">
+            <option value="Зарплата">Зарплата</option>
+            <option value="Фриланс">Фриланс</option>
+            <option value="Перевод">Перевод</option>
+            <option value="Подарок">Подарок</option>
+            <option value="Другое">Другое</option>
+        </select>
+        <button class="btn btn-primary" style="width: 100%; background: var(--success);" onclick="app.finance.add('income')">Зачислить</button>
+    </div>
+    <div id="income-history"></div>
+</div>
+
+<div id="tab-expense" class="container tab-content">
+    <div class="card">
+        <h2>💸 Расход</h2>
+        <input type="number" id="exp-amount" placeholder="Сумма" inputmode="decimal">
+        <select id="exp-cat">
+            <option value="Еда">Еда</option>
+            <option value="Сигареты">🚬 Сигареты</option>
+            <option value="Развлечения">🎉 Развлечения</option>
+            <option value="Квартира">🏠 Квартира</option>
+            <option value="Транспорт">🚕 Транспорт</option>
+            <option value="Здоровье">💊 Здоровье</option>
+            <option value="Другое">Другое</option>
+        </select>
+        <button class="btn btn-primary" style="width: 100%; background: var(--danger);" onclick="app.finance.add('expense')">Списать</button>
+    </div>
+    <div id="expense-history"></div>
+</div>
+
+<nav class="nav-bar">
+    <div class="nav-item active" onclick="app.ui.switchTab('stats', this)">
+        <div class="nav-icon">📊</div>
+    </div>
+    <div class="nav-item" onclick="app.ui.switchTab('tasks', this)">
+        <div class="nav-icon">🎯</div>
+    </div>
+    <div class="nav-item" onclick="app.ui.switchTab('income', this)">
+        <div class="nav-icon">💰</div>
+    </div>
+    <div class="nav-item" onclick="app.ui.switchTab('expense', this)">
+        <div class="nav-icon">💸</div>
+    </div>
+</nav>
+
+<div id="settings-modal" class="modal" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-content">
+        <h2>⚙️ Настройки</h2>
+        <br>
+        <label style="font-weight: bold; margin-bottom: 5px; display: block;">Тема оформления:</label>
+        <button class="btn" style="width: 100%; margin-bottom: 20px;" onclick="app.ui.toggleTheme()">🌓 Переключить тему</button>
+        
+        <label style="font-weight: bold; margin-bottom: 5px; display: block;">Основная валюта:</label>
+        <select id="currency-select" onchange="app.settings.setCurrency(this.value)">
+            <option value="USD">Доллар ($)</option>
+            <option value="EUR">Евро (€)</option>
+            <option value="RUB">Рубль (₽)</option>
+            <option value="GEL">Лари (₾)</option>
+        </select>
+        <p style="font-size: 0.8rem; color: var(--text-sec)">Все суммы будут пересчитаны по текущему курсу.</p>
+        
+        <br>
+        <button class="btn" style="width: 100%; color: var(--danger)" onclick="app.data.reset()">⚠️ Сбросить все данные</button>
+        <br><br>
+        <button class="btn btn-primary" style="width: 100%" onclick="document.getElementById('settings-modal').style.display='none'">Готово</button>
+    </div>
+</div>
+
+<script>
+const app = {
+    // Данные и настройки
+    state: {
+        finances: [], // {id, date, amount, type, category, currency}
+        tasks: {}, // 'YYYY-MM-DD': [{id, text, cat, points, done, subtasks:[]}]
+        settings: { theme: 'light', currency: 'USD' }
+    },
+    
+    // Курсы валют (база - USD)
+    rates: {
+        'USD': 1,
+        'EUR': 0.92,
+        'GEL': 2.75,
+        'RUB': 90.0
+    },
+    
+    symbols: { 'USD': '$', 'EUR': '€', 'GEL': '₾', 'RUB': '₽' },
+    
+    currentDate: new Date().toISOString().split('T')[0],
+
+    init() {
+        this.data.load();
+        this.ui.applyTheme();
+        this.settings.initCurrency();
+        this.tasks.render();
+        this.stats.refresh();
+        this.finance.renderHistory();
+    },
+
+    // --- УПРАВЛЕНИЕ ДАННЫМИ ---
+    data: {
+        load() {
+            const d = localStorage.getItem('teplo_v3');
+            if(d) app.state = {...app.state, ...JSON.parse(d)};
+        },
+        save() {
+            localStorage.setItem('teplo_v3', JSON.stringify(app.state));
+            app.stats.refresh(); // Обновляем статистику при любом сохранении
+        },
+        reset() {
+            if(confirm('Удалить всё?')) {
+                localStorage.removeItem('teplo_v3');
+                location.reload();
+            }
+        }
+    },
+
+    // --- ВАЛЮТА И НАСТРОЙКИ ---
+    settings: {
+        initCurrency() {
+            document.getElementById('currency-select').value = app.state.settings.currency;
+            this.updateSymbols();
+        },
+        setCurrency(curr) {
+            app.state.settings.currency = curr;
+            app.data.save();
+            this.updateSymbols();
+            app.stats.refresh();
+            app.finance.renderHistory();
+        },
+        updateSymbols() {
+            const sym = app.symbols[app.state.settings.currency];
+            document.querySelectorAll('.currency-symbol').forEach(el => el.innerText = sym);
+        },
+        // Конвертер: Любая -> USD -> Целевая
+        convert(amount, fromCurr) {
+            const target = app.state.settings.currency;
+            if (fromCurr === target) return amount;
+            
+            const inUSD = amount / app.rates[fromCurr]; // Переводим в базу
+            return inUSD * app.rates[target]; // Переводим в целевую
+        }
+    },
+
+    // --- ЗАДАЧИ ---
+    tasks: {
+        viewDate: new Date().toISOString().split('T')[0],
+
+        add() {
+            const text = document.getElementById('new-task-text').value;
+            if(!text) return;
+            const cat = document.getElementById('new-task-cat').value;
+            
+            const pointsMap = {'Работа':10, 'Тело':5, 'Фокус':5, 'Быт':2};
+            
+            if(!app.state.tasks[this.viewDate]) app.state.tasks[this.viewDate] = [];
+            
+            app.state.tasks[this.viewDate].push({
+                id: Date.now(),
+                text, cat, 
+                points: pointsMap[cat],
+                done: false,
+                subtasks: []
+            });
+            
+            document.getElementById('new-task-text').value = '';
+            app.data.save();
+            this.render();
+        },
+
+        toggle(id) {
+            const list = app.state.tasks[this.viewDate];
+            const t = list.find(x => x.id === id);
+            if(t) {
+                t.done = !t.done;
+                // Если задача выполнена, считаем что все подзадачи тоже (опционально, но логично)
+                // Или оставляем как есть. Здесь лучше оставить: галочка задачи главнее.
+                app.data.save();
+                this.render();
+            }
+        },
+
+        // Управление подзадачами
+        toggleSubMenu(e, id) {
+            e.stopPropagation(); // Чтобы не срабатывал клик по заголовку
+            const el = document.getElementById('subs-'+id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        },
+
+        addSubtask(e, id) {
+            e.stopPropagation();
+            const text = prompt('Название подзадачи:');
+            if(!text) return;
+            const t = app.state.tasks[this.viewDate].find(x => x.id === id);
+            t.subtasks.push({text, done: false});
+            // Раскрываем меню чтобы видеть добавленное
+            setTimeout(() => document.getElementById('subs-'+id).style.display = 'block', 50);
+            app.data.save();
+            this.render();
+        },
+
+        checkSubtask(e, taskId, subIdx) {
+            e.stopPropagation(); // ВАЖНО: не сворачивать меню
+            const t = app.state.tasks[this.viewDate].find(x => x.id === taskId);
+            t.subtasks[subIdx].done = !t.subtasks[subIdx].done;
+            
+            // Логика: если все подзадачи выполнены -> выполнить главную
+            const allDone = t.subtasks.length > 0 && t.subtasks.every(s => s.done);
+            if (allDone) t.done = true;
+            else t.done = false;
+
+            app.data.save();
+            this.render();
+            // Держим меню открытым
+            document.getElementById('subs-'+taskId).style.display = 'block';
+        },
+
+        changeDay(d) {
+            const date = new Date(this.viewDate);
+            date.setDate(date.getDate() + d);
+            this.viewDate = date.toISOString().split('T')[0];
+            this.render();
+        },
+
+        render() {
+            document.getElementById('current-date-display').innerText = 
+                this.viewDate === app.currentDate ? 'Сегодня' : this.viewDate;
+            
+            const list = document.getElementById('tasks-list');
+            list.innerHTML = '';
+            const tasks = app.state.tasks[this.viewDate] || [];
+
+            tasks.forEach(t => {
+                const isDone = t.done;
+                // Генерация HTML подзадач
+                let subsHtml = '';
+                t.subtasks.forEach((s, idx) => {
+                    subsHtml += `
+                        <div class="subtask-item" onclick="event.stopPropagation()">
+                            <input type="checkbox" ${s.done?'checked':''} onchange="app.tasks.checkSubtask(event, ${t.id}, ${idx})" style="width:20px; height:20px; margin:0 10px 0 0;">
+                            <span style="text-decoration:${s.done?'line-through':''}">${s.text}</span>
+                        </div>
+                    `;
+                });
+
+                const div = document.createElement('div');
+                div.className = 'task-card';
+                div.style.borderLeftColor = isDone ? 'var(--success)' : 'var(--primary)';
+                div.innerHTML = `
+                    <div class="task-header" onclick="app.tasks.toggleSubMenu(event, ${t.id})">
+                        <div style="display:flex; align-items:center; flex:1;">
+                            <input type="checkbox" ${isDone?'checked':''} onclick="event.stopPropagation(); app.tasks.toggle(${t.id})" style="width:24px; height:24px; margin:0;">
+                            <span class="task-title ${isDone?'task-done-text':''}">${t.text}</span>
+                        </div>
+                        <div style="font-size:0.8rem; background:rgba(0,0,0,0.05); padding:5px 10px; border-radius:10px;">${t.points}б</div>
+                    </div>
+                    <div id="subs-${t.id}" class="subtasks-container">
+                        ${subsHtml}
+                        <button class="btn" style="margin-top:10px; width:100%; font-size:0.8rem;" onclick="app.tasks.addSubtask(event, ${t.id})">+ Подзадача</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+    },
+
+    // --- ФИНАНСЫ ---
+    finance: {
+        add(type) {
+            const amtEl = document.getElementById(type==='income'?'inc-amount':'exp-amount');
+            const catEl = document.getElementById(type==='income'?'inc-cat':'exp-cat');
+            
+            const amount = parseFloat(amtEl.value);
+            if(!amount) return;
+
+            app.state.finances.push({
+                id: Date.now(),
+                date: app.currentDate,
+                amount,
+                type,
+                category: catEl.value,
+                currency: app.state.settings.currency // Сохраняем валюту, в которой была запись
+            });
+
+            amtEl.value = '';
+            app.data.save();
+            this.renderHistory();
+            alert('Записано!');
+        },
+
+        renderHistory() {
+            const render = (type, containerId) => {
+                const cont = document.getElementById(containerId);
+                cont.innerHTML = '';
+                // Берем последние 10 записей этого типа
+                const list = app.state.finances.filter(f => f.type === type).reverse().slice(0, 10);
+                
+                list.forEach(f => {
+                    // Конвертируем в текущую валюту для отображения
+                    const displayAmt = app.settings.convert(f.amount, f.currency).toFixed(0);
+                    const sym = app.symbols[app.state.settings.currency];
+                    
+                    const div = document.createElement('div');
+                    div.style.cssText = "display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(0,0,0,0.05);";
+                    div.innerHTML = `
+                        <span>${f.category} <small style="color:var(--text-sec)">${f.date.slice(5)}</small></span>
+                        <span style="font-weight:bold">${displayAmt} ${sym}</span>
+                    `;
+                    cont.appendChild(div);
+                });
+            };
+            render('income', 'income-history');
+            render('expense', 'expense-history');
+        }
+    },
+
+    // --- СТАТИСТИКА ---
+    stats: {
+        period: 'today',
+        
+        setPeriod(p, btn) {
+            this.period = p;
+            document.querySelectorAll('.date-filters .btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active'); // Фикс: если вызываем программно, btn может быть null
+            
+            const map = {'today': 'Сегодня', 'week': 'Последние 7 дней', 'month': 'Последние 30 дней'};
+            document.getElementById('stats-period-label').innerText = map[p];
+            
+            this.refresh();
+        },
+
+        refresh() {
+            // 1. Определяем даты
+            const dates = [];
+            const today = new Date();
+            const daysCount = this.period === 'today' ? 1 : (this.period === 'week' ? 7 : 30);
+            
+            for(let i = daysCount - 1; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                dates.push(d.toISOString().split('T')[0]);
+            }
+
+            // 2. Считаем Финансы и Баллы
+            let totalInc = 0, totalExp = 0, totalPoints = 0;
+            const chartData = dates.map(date => {
+                // Финансы
+                const dayFins = app.state.finances.filter(f => f.date === date);
+                let dInc = 0, dExp = 0;
+                
+                dayFins.forEach(f => {
+                    const val = app.settings.convert(f.amount, f.currency);
+                    if(f.type === 'income') dInc += val;
+                    else dExp += val;
+                });
+                
+                totalInc += dInc;
+                totalExp += dExp;
+
+                // Баллы
+                const dayTasks = app.state.tasks[date] || [];
+                // Берем баллы, если задача выполнена
+                const dPoints = dayTasks.filter(t => t.done).reduce((sum, t) => sum + t.points, 0);
+                totalPoints += dPoints;
+
+                return { date: date.slice(8), inc: dInc, exp: dExp, points: dPoints };
+            });
+
+            // 3. Рендер UI Текстов
+            document.getElementById('total-inc').innerText = totalInc.toFixed(0);
+            document.getElementById('total-exp').innerText = totalExp.toFixed(0);
+            document.getElementById('total-points').innerText = totalPoints;
+            
+            // Рендер Стрика
+            this.calculateStreak();
+
+            // 4. Рендер Графиков
+            this.renderChart('finance-chart', chartData, ['inc', 'exp']);
+            this.renderChart('energy-chart', chartData, ['points']);
+        },
+
+        calculateStreak() {
+            // Считаем стрик: сколько дней подряд назад (начиная со вчера) были баллы > 0
+            // Или если сегодня уже есть баллы, то включая сегодня
+            let streak = 0;
+            const d = new Date();
+            // Начинаем проверку с "Сегодня"
+            
+            while(true) {
+                const dateStr = d.toISOString().split('T')[0];
+                const tasks = app.state.tasks[dateStr] || [];
+                const points = tasks.filter(t => t.done).reduce((a,b)=>a+b.points,0);
+                
+                // Если сегодня баллов 0, и это первый день проверки - не прерываем, смотрим вчера
+                // Но если это вчера и баллов 0 - прерываем
+                
+                // Упрощенная логика: стрик это непрерывная серия дней С выполненными задачами.
+                // Если сегодня 0, но вчера было выполнено - стрик не сбрасывается визуально пока день не прошел.
+                // Будем считать "чистый" стрик назад.
+                
+                if (points > 0) {
+                    streak++;
+                } else {
+                    // Если баллов нет, и это не сегодня (т.е. день в прошлом пропущен) -> конец стрика
+                    if (dateStr !== app.currentDate) break;
+                }
+                d.setDate(d.getDate() - 1);
+                // Защита от бесконечности
+                if (streak > 3650) break; 
+            }
+            document.getElementById('streak-count').innerText = streak;
+        },
+
+        renderChart(id, data, keys) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            
+            // Найти макс значение для масштаба
+            let max = 10;
+            data.forEach(d => {
+                if(keys.includes('points')) max = Math.max(max, d.points);
+                else max = Math.max(max, d.inc, d.exp);
+            });
+
+            data.forEach(d => {
+                const col = document.createElement('div');
+                col.className = 'bar-col';
+                
+                if(keys.includes('points')) {
+                    const h = (d.points / max) * 100;
+                    col.innerHTML = `<div class="bar" style="height:${h}%; background:var(--primary)"></div>`;
+                } else {
+                    // Финансы (2 бара рядом или друг на друге, тут сделаем рядом упрощенно или наложение)
+                    // Для простоты - 2 тонких полоски внутри col не влезет красиво без ширины
+                    // Сделаем: если доход больше расхода - зеленый бар, если расход больше - красный, высота по макс
+                    // Или просто 2 бара абсолютом. Сделаем "Стек"
+                    
+                    const hInc = (d.inc / max) * 100;
+                    const hExp = (d.exp / max) * 100;
+                    
+                    // Рисуем два бара рядом внутри колонки
+                    col.innerHTML = `
+                        <div style="display:flex; align-items:flex-end; width:100%; height:100%; gap:2px;">
+                            <div class="bar" style="height:${hInc}%; background:var(--success); width:50%"></div>
+                            <div class="bar" style="height:${hExp}%; background:var(--danger); width:50%"></div>
+                        </div>
+                    `;
+                }
+                
+                col.innerHTML += `<div class="bar-label">${d.date}</div>`;
+                el.appendChild(col);
+            });
+        }
+    },
+
+    ui: {
+        switchTab(tab, btn) {
+            document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+            document.getElementById('tab-'+tab).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+
+            if(tab === 'stats') app.stats.refresh();
+        },
+        toggleTheme() {
+            app.state.settings.theme = app.state.settings.theme === 'light' ? 'dark' : 'light';
+            this.applyTheme();
+            app.data.save();
+        },
+        applyTheme() {
+            document.body.setAttribute('data-theme', app.state.settings.theme);
+        },
+        toggleModal(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+    }
+};
+
+window.onload = () => app.init();
+</script>
+</body>
+</html>
