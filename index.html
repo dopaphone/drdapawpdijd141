@@ -7,9 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
         :root {
+            /* Цветовая палитра */
             --bg-color: #f4f7fc;
             --card-bg: #ffffff;
             --text-main: #2d3436;
@@ -19,208 +21,290 @@
             --success: #00b894;
             --danger: #ff7675;
             --warning: #fdcb6e;
-            --shadow: 0 10px 20px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.05);
-            --radius: 20px;
+            
+            /* Дизайн-система */
+            --shadow: 0 10px 30px rgba(0,0,0,0.06), 0 2px 10px rgba(0,0,0,0.02);
+            --radius: 24px;
             --font-main: 'Montserrat', sans-serif;
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
         }
 
         [data-theme="dark"] {
-            --bg-color: #1e1e24;
-            --card-bg: #2d3436;
-            --text-main: #dfe6e9;
+            --bg-color: #121212;
+            --card-bg: #1e1e24;
+            --text-main: #f5f6fa;
             --text-sec: #b2bec3;
             --primary: #a29bfe; 
-            --shadow: 0 10px 20px rgba(0,0,0,0.3);
+            --shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
 
+        /* --- БАЗА --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
-            margin: 0; padding: 0 0 100px 0;
-            background: var(--bg-color); color: var(--text-main);
-            font-family: var(--font-main); transition: background 0.3s ease, color 0.3s ease;
+            margin: 0; 
+            padding: 0 0 calc(90px + var(--safe-area-bottom)) 0;
+            background: var(--bg-color); 
+            color: var(--text-main);
+            font-family: var(--font-main); 
+            transition: background 0.3s ease, color 0.3s ease;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
         .hidden { display: none !important; }
 
-        /* CARDS */
+        /* --- ТИПОГРАФИКА И ЭЛЕМЕНТЫ --- */
+        h2 { font-size: 1.2rem; margin: 0 0 15px 0; color: var(--primary); font-weight: 800; letter-spacing: -0.5px; }
+        h3 { margin: 0; font-weight: 700; letter-spacing: -0.3px; }
+
         .card {
             background: var(--card-bg); border-radius: var(--radius);
             padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
-            transition: 0.3s; position: relative;
+            transition: 0.2s; position: relative; border: 1px solid rgba(0,0,0,0.02);
         }
+        .card:active { transform: scale(0.995); }
 
-        h2 { font-size: 1.1rem; margin: 0 0 15px 0; color: var(--primary); font-weight: 800; }
-        h3 { margin: 0; font-weight: 700; }
-
-        /* BUTTONS */
+        /* --- КНОПКИ И ИНПУТЫ (КРУПНЫЕ) --- */
         button { border: none; cursor: pointer; font-family: inherit; font-weight: 600; transition: 0.2s; }
+        
         .btn {
-            padding: 12px 18px; border-radius: 14px;
+            padding: 0 20px; height: 48px; border-radius: 16px;
             background: var(--bg-color); color: var(--text-main);
             box-shadow: var(--shadow); display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.95rem;
         }
-        .btn:active { transform: translateY(2px); }
-        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); }
-        .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 10px; }
-        .btn-circle { width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 1.2rem; }
-        .btn-toggle { background: transparent; padding: 0 10px; color: var(--text-sec); font-size: 1.2rem; }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3); }
+        
+        .btn-sm { height: 36px; padding: 0 14px; font-size: 0.8rem; border-radius: 12px; }
+        .btn-circle { width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 1.3rem; }
+        .btn-toggle { background: transparent; padding: 5px 10px; color: var(--text-sec); font-size: 1.4rem; }
+        
+        /* Кнопка Фокуса (Антивыгорание) */
+        .btn-focus {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white; border-radius: 20px; padding: 6px 14px;
+            font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); margin-right: 5px;
+        }
+        .btn-focus:active { transform: scale(0.95); }
 
         input, select {
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);
-            background: var(--bg-color); color: var(--text-main);
-            margin-bottom: 10px; font-size: 1rem; font-family: inherit;
+            width: 100%; height: 48px; padding: 0 15px; border-radius: 14px; 
+            border: 1px solid rgba(0,0,0,0.05); background: var(--bg-color); 
+            color: var(--text-main); margin-bottom: 10px; font-size: 16px;
+            font-family: inherit; transition: 0.2s;
         }
+        input:focus, select:focus { border-color: var(--primary); background: var(--card-bg); }
 
-        /* HEADER & FILTER */
+        /* --- ХЕДЕР (РАЗМЫТЫЙ) --- */
         header {
             position: sticky; top: 0; z-index: 100; padding: 15px 20px;
-            background: var(--card-bg); box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
         }
+        [data-theme="dark"] header { background: rgba(30, 30, 36, 0.9); }
+        
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .logo { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; }
+        .logo { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; background: -webkit-linear-gradient(0deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .global-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .global-filter { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .filter-chip {
-            white-space: nowrap; padding: 6px 12px; border-radius: 20px;
-            background: var(--bg-color); font-size: 0.8rem; color: var(--text-sec);
+            white-space: nowrap; padding: 8px 16px; border-radius: 20px;
+            background: var(--bg-color); font-size: 0.85rem; color: var(--text-sec); font-weight: 600;
             border: 1px solid transparent; transition: 0.2s; cursor: pointer;
         }
-        .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-        
+        .filter-chip.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2); }
         #custom-date-panel { display: flex; gap: 5px; margin-top: 10px; animation: fadeIn 0.3s; }
 
-        /* TABS */
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        /* --- ТАБЫ И ЗАДАЧИ --- */
+        .tab-content { display: none; animation: fadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* TASKS */
         .task-item {
-            background: var(--bg-color); border-radius: 14px; padding: 12px;
-            margin-bottom: 10px; border-left: 4px solid transparent;
+            background: var(--bg-color); border-radius: 18px; padding: 16px;
+            margin-bottom: 12px; border-left: 5px solid transparent; transition: transform 0.1s;
         }
-        .recurring-badge { font-size: 0.6rem; background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
-        .subtasks-list { margin-top: 8px; padding-left: 10px; border-left: 2px solid rgba(0,0,0,0.05); }
-        .subtask { display: flex; align-items: center; margin-top: 5px; font-size: 0.85rem; }
+        input[type="checkbox"] { width: 24px !important; height: 24px !important; margin: 0; accent-color: var(--primary); cursor: pointer; }
+        .recurring-badge { font-size: 0.6rem; background: var(--accent); color: white; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold; }
+        .subtasks-list { margin-top: 10px; padding-left: 12px; border-left: 2px solid rgba(0,0,0,0.05); }
+        .subtask { display: flex; align-items: center; margin-top: 8px; font-size: 0.9rem; }
 
-        /* GOALS */
-        .goal-item { border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 15px; margin-bottom: 15px; }
-        .goal-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px 0; }
-        .progress-bar { height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; margin: 10px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: 0.5s; }
-
-        /* WALLET */
-        .wallet-card { padding: 15px; border-radius: 16px; color: white; margin-bottom: 10px; position: relative; overflow: hidden; }
+        /* --- КОШЕЛЕК И МАГАЗИН --- */
+        .wallet-card { padding: 20px; border-radius: 20px; color: white; margin-bottom: 15px; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .wallet-inc { background: linear-gradient(135deg, #00b894, #00cec9); }
         .wallet-exp { background: linear-gradient(135deg, #ff7675, #d63031); }
-        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.9rem; }
-
-        /* NAV */
-        .nav-bar {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px;
-            background: var(--card-bg); border-radius: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: flex; justify-content: space-around; padding: 12px; z-index: 999;
-        }
-        .nav-item { opacity: 0.5; transition: 0.3s; display: flex; flex-direction: column; align-items: center; width: 60px; cursor: pointer; }
-        .nav-item.active { opacity: 1; color: var(--primary); transform: translateY(-3px); }
-
-        /* MODALS */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; padding: 25px; border-radius: 25px; max-height: 85vh; overflow-y: auto; }
-
-        /* CHARTS */
-        .chart-box { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; gap: 4px; padding-top: 10px; }
-        .bar-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
-        .bar { width: 80%; border-radius: 4px 4px 0 0; min-height: 4px; }
-        /* --- НОВЫЕ СТИЛИ: ДИАГРАММА И СОРТИРОВКА --- */
+        .history-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.95rem; }
         
-        /* Круговая диаграмма */
-        .pie-chart-container {
-            display: flex; align-items: center; justify-content: space-around;
-            padding: 10px 0;
-        }
-        .pie-chart {
-            width: 120px; height: 120px; border-radius: 50%;
-            background: conic-gradient(var(--text-sec) 0% 100%); /* Заглушка */
-            box-shadow: inset 0 0 0 20px var(--card-bg); /* Делаем бублик */
-        }
-        .chart-legend { font-size: 0.8rem; display: flex; flex-direction: column; gap: 5px; }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .legend-color { width: 10px; height: 10px; border-radius: 50%; }
-
-        /* Сортировка в кошельке */
-        .wallet-controls { display: flex; gap: 10px; margin-bottom: 15px; }
-        .sort-select { 
-            padding: 8px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); 
-            background: var(--bg-color); font-size: 0.8rem; flex: 1; margin: 0;
-        }
-        /* --- МАГАЗИН --- */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .shop-item {
-            background: var(--card-bg); padding: 15px; border-radius: 16px;
+            background: var(--card-bg); padding: 20px 15px; border-radius: 20px;
             display: flex; flex-direction: column; align-items: center; text-align: center;
             box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); position: relative;
         }
-        .shop-icon { font-size: 2.5rem; margin-bottom: 5px; }
+        .shop-icon { font-size: 3rem; margin-bottom: 10px; }
         .shop-price {
-            background: var(--warning); color: #fff; padding: 4px 10px; border-radius: 10px;
-            font-size: 0.8rem; font-weight: bold; margin-bottom: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: var(--warning); color: #fff; padding: 5px 12px; border-radius: 10px;
+            font-size: 0.85rem; font-weight: bold; margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(253, 203, 110, 0.4);
         }
-        .btn-buy {
-            width: 100%; padding: 8px; background: var(--bg-color); color: var(--text-main);
-            border-radius: 10px; font-size: 0.8rem; font-weight: bold;
-        }
+        .btn-buy { width: 100%; padding: 10px; background: var(--bg-color); color: var(--text-main); border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
         .btn-buy:active { background: var(--success); color: white; }
-        .del-reward { position: absolute; top: 5px; right: 5px; color: var(--danger); opacity: 0.3; cursor: pointer; }
-        /* Крестик удаления в магазине */
-        .del-reward { 
-            position: absolute; 
-            top: 5px; 
-            right: 10px; 
-            color: var(--danger); 
-            font-size: 1.2rem;
-            font-weight: bold;
-            opacity: 0.5; 
-            cursor: pointer; 
-            z-index: 10;
-        }
+        .del-reward { position: absolute; top: 8px; right: 8px; color: var(--danger); opacity: 0.4; cursor: pointer; font-size: 1.2rem; font-weight: bold; padding: 5px; }
         .del-reward:hover { opacity: 1; }
-        /* ТАЙМЕР ФОКУСА */
-        .timer-display { 
-            font-size: 4.5rem; font-weight: 900; color: var(--text-main); 
-            margin: 20px 0; font-variant-numeric: tabular-nums; 
-            line-height: 1;
+
+        /* --- НАВИГАЦИЯ (СТЕКЛО) --- */
+        .nav-bar {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 450px;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex; justify-content: space-around; padding: 12px 10px; z-index: 999;
         }
-        .timer-mode {
-            background: rgba(0,0,0,0.05); padding: 5px 15px; 
-            border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; 
-            letter-spacing: 1px; font-weight: bold; color: var(--text-sec);
+        [data-theme="dark"] .nav-bar { background: rgba(30, 30, 36, 0.85); border: 1px solid rgba(255,255,255,0.05); }
+
+        .nav-item { opacity: 0.4; transition: 0.3s; display: flex; flex-direction: column; align-items: center; width: 60px; cursor: pointer; transform: scale(0.9); }
+        .nav-item.active { opacity: 1; color: var(--primary); transform: scale(1) translateY(-2px); }
+
+        /* --- МОДАЛКИ (ШТОРКИ СНИЗУ) --- */
+        .modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); 
+            z-index: 2000; display: none; align-items: flex-end; justify-content: center;
         }
-        .timer-controls { display: flex; gap: 15px; justify-content: center; width: 100%; margin-top: 20px; }
-        /* Зеленый для отдыха, Фиолетовый для работы */
+        .modal-content { 
+            background: var(--card-bg); width: 100%; max-width: 600px;
+            border-radius: 30px 30px 0 0; padding: 30px 25px 60px 25px; 
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+            transform: translateY(100%); animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes slideUp { to { transform: translateY(0); } }
+
+        /* --- ГРАФИКИ, ТАЙМЕР, НАСТРОЕНИЕ --- */
+        .chart-box { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; gap: 4px; padding-top: 10px; }
+        .bar-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+        .bar { width: 80%; border-radius: 6px 6px 0 0; min-height: 4px; }
+        
+        .pie-chart-container { display: flex; align-items: center; justify-content: space-around; padding: 10px 0; }
+        .pie-chart { width: 120px; height: 120px; border-radius: 50%; box-shadow: inset 0 0 0 25px var(--card-bg); }
+        .chart-legend { font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 4px; }
+
+        .timer-display { font-size: 5rem; font-weight: 900; color: var(--text-main); margin: 30px 0; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -2px; }
+        .timer-mode { background: rgba(0,0,0,0.05); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; color: var(--text-sec); display: inline-block; }
+        .timer-controls { display: flex; gap: 15px; justify-content: center; width: 100%; margin-top: 30px; }
         .mode-work .timer-display { color: var(--primary); }
         .mode-rest .timer-display { color: var(--success); }
-        /* Кнопка Фокуса (Антивыгорание) */
-        .btn-focus {
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe); /* Фиолетовый градиент */
-            color: white;
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
-            transition: 0.2s;
-            margin-right: 5px;
+
+        .mood-grid { display: flex; justify-content: space-between; margin-top: 15px; background: var(--bg-color); padding: 10px; border-radius: 20px; }
+        .mood-btn { font-size: 2rem; background: transparent; border: none; cursor: pointer; opacity: 0.4; transition: 0.2s; transform: scale(0.9); padding: 0; }
+        .mood-btn.selected { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 10px rgba(0,0,0,0.1)); }
+        /* --- ЖИВОЕ СЕРДЦЕ (BLOB) --- */
+        /* --- LIVING BLOB 2.0 (Жидкий и Умный) --- */
+        .living-blob {
+            width: 32px; height: 32px; 
+            border-radius: 50%;
+            margin-right: auto; margin-left: 15px;
+            transition: all 0.5s ease;
+            position: relative;
+            
+            /* Базовая "жидкая" анимация */
+            animation: liquid 5s infinite ease-in-out;
         }
-        .btn-focus:active { transform: scale(0.95); }
+
+        /* 1. ЭФФЕКТ "ЩИТ" (Фокус) - Двойное свечение */
+        .blob-shield {
+            background: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.5), 0 0 15px var(--primary);
+            animation: pulseShield 2s infinite !important;
+        }
+
+        /* 2. ЭФФЕКТ "ТРЕВОГА" (Расходы) - Тряска и красный цвет */
+        .blob-panic {
+            background: var(--danger) !important;
+            box-shadow: 0 0 10px var(--danger);
+            animation: shake 0.5s infinite !important;
+        }
+
+        /* 3. ЭФФЕКТ "ДЕПРЕССИЯ" (Плохое настроение) - Серый и медленный */
+        .blob-sad {
+            filter: grayscale(1) opacity(0.6);
+            transform: scale(0.8);
+            animation-duration: 10s !important; /* Очень медленно */
+        }
+
+        /* 4. ЭФФЕКТ "МОЩЬ" (Много баллов) - Большой и яркий */
+        .blob-power {
+            filter: brightness(1.3) drop-shadow(0 0 8px currentColor);
+            transform: scale(1.2);
+            animation-duration: 2s !important; /* Быстро */
+        }
+
+        /* --- АНИМАЦИИ --- */
+        @keyframes liquid {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        @keyframes pulseShield {
+            0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(108, 92, 231, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); }
+        }
+
+        /* --- ЧЕК ДНЯ (RECEIPT) --- */
+        .receipt-paper {
+            background: #fff; padding: 25px; margin-bottom: 20px;
+            font-family: 'Courier New', Courier, monospace; /* Шрифт как в чеке */
+            color: #333; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            /* Зубчики чека через градиент - сеньорский трюк */
+            background-image: linear-gradient(135deg, transparent 50%, #fff 50%), linear-gradient(45deg, transparent 50%, #fff 50%);
+            background-position: top; background-size: 15px 15px; background-repeat: repeat-x;
+        }
+        .receipt-header { text-align: center; border-bottom: 2px dashed #333; padding-bottom: 15px; margin-bottom: 15px; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .receipt-total { border-top: 2px dashed #333; padding-top: 10px; margin-top: 10px; font-weight: 900; font-size: 1.2rem; display: flex; justify-content: space-between; }
+        .receipt-footer { text-align: center; margin-top: 20px; font-size: 0.7rem; opacity: 0.6; }
+        /* --- МИНИ ТАЙМЕР И СВОРАЧИВАНИЕ --- */
+        .mini-timer {
+            position: fixed; bottom: 100px; left: 5%; width: 90%;
+            background: rgba(30, 30, 36, 0.95); backdrop-filter: blur(10px);
+            color: white; padding: 15px 20px; border-radius: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 1500;
+            cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.15);
+            animation: slideUp 0.3s forwards;
+        }
+        .mini-timer:active { transform: scale(0.95); }
+        
+        /* Стрелка сворачивания внутри модалки */
+        .minimize-btn {
+            position: absolute; top: 15px; right: 20px; 
+            font-size: 2rem; opacity: 0.5; cursor: pointer;
+            width: 40px; height: 40px; line-height: 40px;
+            text-align: center; border-radius: 50%;
+            background: rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -228,11 +312,16 @@
 <header>
     <div class="header-top">
         <div class="logo">ТЕПЛО</div>
-        <div style="display: flex; gap: 10px;">
+        
+        <div id="blob" class="living-blob blob-calm" title="Пульс твоего дня"></div>
+
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-circle" onclick="app.receipt.open()" style="font-size: 1.1rem;">🧾</button>
             <button class="btn btn-circle" onclick="app.ui.modal('achievements')" style="color: #f1c40f;">🏆</button>
             <button class="btn btn-circle" onclick="app.ui.modal('settings')">⚙️</button>
         </div>
     </div>
+    
     <div class="global-filter">
         <div class="filter-chip active" onclick="app.ui.setFilter('today', this)">Сегодня</div>
         <div class="filter-chip" onclick="app.ui.setFilter('week', this)">Неделя</div>
@@ -248,6 +337,14 @@
 </header>
 
 <div id="tab-stats" class="container tab-content active">
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <h3>🌡 Как ты сегодня?</h3>
+            <small id="mood-date" style="color:var(--text-sec)">Сегодня</small>
+        </div>
+        <div class="mood-grid" id="mood-container">
+            </div>
+    </div>
     <div class="card" style="background: linear-gradient(135deg, #a29bfe, #6c5ce7); color: white;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -467,6 +564,8 @@
 </div>
 <div id="modal-timer" class="modal" style="z-index: 3000;">
     <div class="modal-content" style="text-align: center;">
+        <div class="minimize-btn" onclick="event.stopPropagation(); app.timer.minimize()">⌄</div>
+
         <div id="timer-mode-badge" class="timer-mode">Фокус</div>
         <h2 id="timer-task-name" style="margin: 15px 0 5px; font-size: 1.2rem;">Задача</h2>
         
@@ -484,6 +583,20 @@
         <button id="btn-rest" class="btn" style="width:100%; margin-top:15px; background:var(--success); color:white; display:none" onclick="app.timer.startRest()">☕ Перейти к отдыху (15 мин)</button>
     </div>
 </div>
+<div id="mini-timer" class="mini-timer" onclick="app.timer.maximize()" style="display: none;">
+    <div style="display:flex; align-items:center; gap:15px;">
+        <span id="mini-timer-icon" style="font-size: 1.5rem;">🍅</span>
+        <div>
+            <div id="mini-timer-val" style="font-weight:900; font-family:monospace; font-size:1.4rem; line-height:1;">00:00</div>
+            <div style="font-size:0.7rem; opacity:0.7">Нажми, чтобы развернуть</div>
+        </div>
+    </div>
+    <div style="font-size:1.5rem;">⌃</div>
+</div>
+<div id="modal-receipt" class="modal" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-content" style="background: var(--bg-color);"> <div id="receipt-content"></div> <button class="btn btn-primary" style="width:100%" onclick="document.getElementById('modal-receipt').style.display='none'">Закрыть</button>
+    </div>
+</div>
 <script>
 const app = {
     state: {
@@ -497,6 +610,93 @@ const app = {
         moods: {}, // Добавили хранение настроения
         settings: { currency: 'USD', theme: 'light' },
         filter: { start: '', end: '', mode: 'today' }
+    },
+    // --- АУДИО ДВИЖОК (Синтезатор звуков) ---
+    audio: {
+        ctx: null,
+        init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+        play(type) {
+            this.init();
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            const now = this.ctx.currentTime;
+
+            if (type === 'success') { // Мажорный "Дзынь!"
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } 
+            else if (type === 'click') { // Мягкий клик
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+            else if (type === 'error') { // Глухой звук
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            }
+        }
+    },
+
+    // --- ГЕНЕРАТОР ЧЕКА ДНЯ ---
+    receipt: {
+        open() {
+            const date = app.viewDate;
+            const tasks = (app.state.tasks[date] || []).filter(t => t.done);
+            const fins = app.state.finances.filter(f => f.date === date);
+            
+            const totalPoints = tasks.reduce((a,b)=>a+b.points,0);
+            const inc = fins.filter(f=>f.type==='income').reduce((a,b)=>a+b.amount,0);
+            const exp = fins.filter(f=>f.type==='expense').reduce((a,b)=>a+b.amount,0);
+            const mood = app.state.moods[date] || 3;
+            const moodIcon = ['💀','😫','😕','😐','🙂','🤩'][mood] || '😐';
+
+            let taskList = tasks.map(t => 
+                `<div class="receipt-row"><span>${t.text.slice(0,20)}...</span><span>${t.points}б</span></div>`
+            ).join('');
+            
+            if(tasks.length === 0) taskList = '<div style="text-align:center; margin:10px 0;">Нет выполненных задач</div>';
+
+            const html = `
+                <div class="receipt-paper">
+                    <div class="receipt-header">
+                        <h3>ТЕПЛО OS</h3>
+                        <small>${date} • ${new Date().toLocaleTimeString()}</small><br>
+                        <div style="font-size: 2rem; margin-top: 10px;">${moodIcon}</div>
+                    </div>
+                    
+                    <div style="text-transform: uppercase; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #eee">Задачи</div>
+                    ${taskList}
+                    
+                    <div style="text-transform: uppercase; font-weight:bold; margin:15px 0 10px; border-bottom:1px solid #eee">Финансы</div>
+                    <div class="receipt-row"><span>Доход</span><span>+${inc}</span></div>
+                    <div class="receipt-row"><span>Расход</span><span>-${exp}</span></div>
+                    
+                    <div class="receipt-total">
+                        <span>ИТОГО ЭНЕРГИИ:</span>
+                        <span>${totalPoints} ⚡</span>
+                    </div>
+                    
+                    <div class="receipt-footer">
+                        СПАСИБО, ЧТО ЖИВЕШЬ ЭТУ ЖИЗНЬ<br>
+                        Сохрани этот чек на память
+                    </div>
+                </div>
+            `;
+            document.getElementById('receipt-content').innerHTML = html;
+            document.getElementById('modal-receipt').style.display = 'flex';
+            app.audio.play('click');
+        }
     },
     
     viewDate: new Date().toISOString().split('T')[0],
@@ -563,6 +763,31 @@ const app = {
     },
 
     // МАГАЗИН (Исправлено: таймер убран отсюда)
+    // 1. БЛОК НАСТРОЕНИЯ (НОВЫЙ)
+    mood: {
+        options: [{v:1,i:'😫'},{v:2,i:'😕'},{v:3,i:'😐'},{v:4,i:'🙂'},{v:5,i:'🤩'}],
+        set(val) {
+            const date = new Date().toISOString().split('T')[0];
+            app.state.moods[date] = val;
+            app.data.save();
+            app.audio.play('click');
+            // Обновляем блоб сразу при клике
+            app.ui.renderBlob(); 
+        },
+        render() {
+            const c = document.getElementById('mood-container');
+            if(!c) return;
+            c.innerHTML = '';
+            const date = new Date().toISOString().split('T')[0];
+            const current = app.state.moods[date];
+            this.options.forEach(opt => {
+                const isSel = current === opt.v;
+                c.innerHTML += `<button class="mood-btn ${isSel?'selected':''}" onclick="app.mood.set(${opt.v})">${opt.i}</button>`;
+            });
+        }
+    },
+
+    // 2. БЛОК МАГАЗИНА (ИСПРАВЛЕННЫЙ - БЕЗ ТАЙМЕРА)
     shop: {
         add() {
             const t = document.getElementById('reward-title').value;
@@ -594,9 +819,7 @@ const app = {
             const c = document.getElementById('shop-list'); c.innerHTML = '';
             const bal = app.ui.calcTotalPoints() - app.state.spent;
             document.getElementById('shop-balance').innerText = bal;
-            
             if(app.state.rewards.length === 0) { c.innerHTML = '<div style="grid-column:1/-1; opacity:0.5; text-align:center">Пусто</div>'; return; }
-
             app.state.rewards.forEach(r => {
                 const can = bal >= r.cost;
                 c.innerHTML += `
@@ -610,68 +833,203 @@ const app = {
             });
         }
     },
+    audio: {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        
+        play(type) {
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
 
-    // ТАЙМЕР (Теперь на своем месте!)
+            const now = this.ctx.currentTime;
+            
+            if (type === 'success') {
+                // Приятный "Дзынь!" (мажорный аккорд)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1); // C6
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } 
+            else if (type === 'click') {
+                // Легкий щелчок
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+            else if (type === 'error') {
+                // Глухой звук (ошибка/удаление)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        }
+    },
+
+
+    // 3. БЛОК ТАЙМЕРА (ТЕПЕРЬ ОТДЕЛЬНО!)
     timer: {
-        interval: null, timeLeft: 0, mode: 'work', isRunning: false, currentTask: '',
+        interval: null,
+        targetTime: null, // Время окончания
+        mode: 'work',
+        isRunning: false,
+        currentTask: '',
+
+        // 1. ОТКРЫТИЕ
         open(taskName) {
-            // Экранируем кавычки, чтобы не ломался HTML
-            this.currentTask = taskName.replace(/'/g, "") || 'Фокус';
+            // Удаляем кавычки, чтобы не ломался JS
+            this.currentTask = taskName.replace(/['"]/g, "") || 'Фокус';
             this.setMode('work');
             document.getElementById('timer-task-name').innerText = this.currentTask;
-            document.getElementById('modal-timer').style.display = 'flex';
+            
+            // Просим разрешение на уведомления
+            if (Notification.permission !== "granted") Notification.requestPermission();
+            
+            this.maximize(); // Показываем большое окно
         },
+
+        // 2. УСТАНОВКА РЕЖИМА (Работа/Отдых)
         setMode(mode) {
-            this.mode = mode; this.isRunning = false; clearInterval(this.interval);
+            this.mode = mode;
+            this.isRunning = false;
+            clearInterval(this.interval);
+            this.targetTime = null;
+
             const cont = document.getElementById('timer-container');
             const badge = document.getElementById('timer-mode-badge');
             const btn = document.getElementById('timer-btn');
             const btnRest = document.getElementById('btn-rest');
-
+            
+            const mins = mode === 'work' ? 40 : 15;
+            
             if (mode === 'work') {
-                this.timeLeft = 40 * 60; 
-                cont.className = 'mode-work'; badge.innerText = '💪 Время работать'; btnRest.style.display = 'none';
+                cont.className = 'mode-work';
+                badge.innerText = '💪 Время работать';
+                btnRest.style.display = 'none';
             } else {
-                this.timeLeft = 15 * 60; 
-                cont.className = 'mode-rest'; badge.innerText = '☕ Время отдыха'; btnRest.style.display = 'none';
+                cont.className = 'mode-rest';
+                badge.innerText = '☕ Время отдыха';
+                btnRest.style.display = 'none';
             }
-            btn.innerText = 'Старт'; btn.style.background = mode==='work'?'var(--primary)':'var(--success)';
-            this.updateView();
+            
+            btn.innerText = 'Старт';
+            btn.style.background = mode==='work'?'var(--primary)':'var(--success)';
+            this.renderTime(mins * 60);
         },
+
         toggle() { if(this.isRunning) this.pause(); else this.start(); },
+
+        // 3. ЗАПУСК (С защитой от блокировки экрана)
         start() {
+            if(!this.targetTime) {
+                // Первый запуск: Текущее время + минуты
+                const mins = this.mode === 'work' ? 40 : 15;
+                this.targetTime = Date.now() + (mins * 60 * 1000);
+            } else {
+                // Если продолжили после паузы: Считаем новый финиш от того, что на экране
+                const parts = document.getElementById('timer-val').innerText.split(':');
+                const secLeft = parseInt(parts[0])*60 + parseInt(parts[1]);
+                this.targetTime = Date.now() + (secLeft * 1000);
+            }
+
             this.isRunning = true;
             document.getElementById('timer-btn').innerText = 'Пауза';
             document.getElementById('timer-btn').style.background = 'var(--warning)';
+            
+            if(app.ui.renderBlob) app.ui.renderBlob(); // Включаем щит (если есть blob)
+
             this.interval = setInterval(() => {
-                this.timeLeft--; this.updateView();
-                if(this.timeLeft <= 0) this.finish();
+                const diff = this.targetTime - Date.now();
+                if (diff <= 0) {
+                    this.finish();
+                } else {
+                    this.renderTime(Math.ceil(diff / 1000));
+                }
             }, 1000);
         },
+
         pause() {
-            this.isRunning = false; clearInterval(this.interval);
+            this.isRunning = false;
+            clearInterval(this.interval);
+            this.targetTime = null; // Сбрасываем цель (при рестарте пересчитаем)
             document.getElementById('timer-btn').innerText = 'Продолжить';
             document.getElementById('timer-btn').style.background = this.mode==='work'?'var(--primary)':'var(--success)';
+            if(app.ui.renderBlob) app.ui.renderBlob();
         },
-        startRest() { this.setMode('rest'); this.start(); },
-        cancel() { this.pause(); document.getElementById('modal-timer').style.display = 'none'; },
-        finish() {
-            this.pause();
-            if(navigator.vibrate) navigator.vibrate([300, 100, 300]);
-            if(this.mode === 'work') {
-                alert('🎉 40 минут прошло! Время отдыха.');
-                if(!app.state.tasks[app.viewDate]) app.state.tasks[app.viewDate] = [];
-                app.state.tasks[app.viewDate].push({id: Date.now(), text: `🍅 Сессия: ${this.currentTask}`, cat: 'Фокус', points: 15, done: true, sub: []});
-                app.data.save();
-                document.getElementById('btn-rest').style.display = 'block';
+
+        // 4. СВОРАЧИВАНИЕ / РАЗВОРАЧИВАНИЕ
+        minimize() {
+            if(this.isRunning) {
+                document.getElementById('modal-timer').style.display='none';
+                document.getElementById('mini-timer').style.display='flex';
+                document.getElementById('mini-timer-icon').innerText = this.mode==='work'?'🍅':'☕';
             } else {
-                alert('🔋 Отдых окончен!'); document.getElementById('modal-timer').style.display = 'none';
+                this.cancel(); // Если на паузе - просто закрываем
             }
         },
-        updateView() {
-            const m = Math.floor(this.timeLeft/60).toString().padStart(2,'0');
-            const s = (this.timeLeft%60).toString().padStart(2,'0');
-            document.getElementById('timer-val').innerText = `${m}:${s}`;
+
+        maximize() {
+            document.getElementById('mini-timer').style.display='none';
+            document.getElementById('modal-timer').style.display='flex';
+        },
+
+        cancel() { 
+            this.pause(); 
+            document.getElementById('modal-timer').style.display='none'; 
+            document.getElementById('mini-timer').style.display='none'; 
+        },
+
+        startRest() { this.setMode('rest'); this.start(); },
+
+        // 5. ФИНИШ
+        finish() {
+            this.pause();
+            this.renderTime(0);
+            
+            // Звук
+            if(app.audio) app.audio.play('success');
+            if(navigator.vibrate) navigator.vibrate([500, 200, 500]);
+            
+            // Уведомление
+            if (Notification.permission === "granted") {
+                new Notification(this.mode==='work' ? "🍅 Время вышло!" : "🔋 Отдых окончен!", {
+                    body: "Нажми сюда, чтобы продолжить."
+                });
+            } else {
+                alert("Время вышло!");
+            }
+
+            this.maximize(); // Разворачиваем, чтобы показать кнопку
+            
+            if(this.mode === 'work') {
+                if(!app.state.tasks[app.viewDate]) app.state.tasks[app.viewDate] = [];
+                app.state.tasks[app.viewDate].push({
+                    id: Date.now(), text: `🍅 Сессия: ${this.currentTask}`, cat: 'Фокус', points: 15, done: true
+                });
+                app.data.save();
+                document.getElementById('btn-rest').style.display = 'block';
+            }
+        },
+
+        renderTime(s) {
+            const m = Math.floor(s/60).toString().padStart(2,'0');
+            const sec = (s%60).toString().padStart(2,'0');
+            const txt = `${m}:${sec}`;
+            
+            // Обновляем везде
+            document.getElementById('timer-val').innerText = txt;
+            document.getElementById('mini-timer-val').innerText = txt;
+            document.title = txt; // Время во вкладке браузера
         }
     },
 
@@ -679,12 +1037,32 @@ const app = {
         nav(d) {
             const dt = new Date(app.viewDate); dt.setDate(dt.getDate() + d);
             app.viewDate = dt.toISOString().split('T')[0]; app.ui.updateAll();
+            app.audio.play('click');
         },
+        
+        // ПРОВЕРКА ЛИМИТА ЭНЕРГИИ ПРИ ДОБАВЛЕНИИ
         add() {
             const txt = document.getElementById('task-input').value; if(!txt) return;
             const cat = document.getElementById('task-cat').value;
             const rec = document.getElementById('task-recur').checked;
             const pts = {'Работа':10, 'Тело':5, 'Фокус':5, 'Быт':2}[cat];
+
+            // Проверяем лимит на сегодня, если это не регулярная задача
+            if (!rec) {
+                const date = app.viewDate;
+                const mood = app.state.moods[date] || 3; // По дефолту 3
+                // Лимиты: 1=20баллов, 2=30... 5=Бесконечно(1000)
+                const limits = {1: 20, 2: 35, 3: 50, 4: 80, 5: 1000};
+                
+                // Считаем текущие баллы
+                const currentPts = (app.state.tasks[date] || []).reduce((a,b)=>a+b.points,0);
+                
+                if (currentPts + pts > limits[mood]) {
+                    if(!confirm(`⚠️ Осторожно!\nТвое настроение сегодня не очень, а ты уже набрал задач на ${currentPts} баллов.\nЛимит для этого настроения: ${limits[mood]}.\n\nТочно добавить?`)) {
+                        return; // Отменяем добавление
+                    }
+                }
+            }
 
             if(rec) app.state.recurring.push({id: Date.now(), text: txt, cat, points: pts});
             else {
@@ -693,27 +1071,47 @@ const app = {
             }
             document.getElementById('task-input').value = '';
             document.getElementById('task-recur').checked = false;
+            app.audio.play('click');
             app.data.save();
         },
+        
+        // КОНФЕТТИ И ЗВУК ПРИ ЗАВЕРШЕНИИ
         toggle(id) {
             let t = (app.state.tasks[app.viewDate]||[]).find(x => x.id === id);
-            if(t) t.done = !t.done;
-            else {
+            let justDone = false;
+            
+            if(t) { 
+                t.done = !t.done; 
+                if(t.done) justDone = true;
+            } else {
                 const tmpl = app.state.recurring.find(x => x.id === id);
                 if(tmpl) {
                     if(!app.state.tasks[app.viewDate]) app.state.tasks[app.viewDate] = [];
                     app.state.tasks[app.viewDate].push({id: tmpl.id, realId: Date.now(), text: tmpl.text, cat: tmpl.cat, points: tmpl.points, done: true, sub: [], expanded: false, isRecurInstance: true});
+                    justDone = true;
                 }
+            }
+            
+            if(justDone) {
+                app.audio.play('success');
+                app.ui.triggerConfetti();
+            } else {
+                app.audio.play('click');
             }
             app.data.save();
         },
+        
         addSub(id) {
             const t = this.find(id); const txt = prompt('Подзадача:');
             if(t && txt) { t.sub.push({text: txt, done: false}); t.expanded = true; app.data.save(); }
         },
         togSub(tid, idx) {
             const t = this.find(tid);
-            if(t) { t.sub[idx].done = !t.sub[idx].done; if(t.sub.every(s=>s.done)) t.done=true; else t.done=false; app.data.save(); }
+            if(t) { 
+                t.sub[idx].done = !t.sub[idx].done; 
+                if(t.sub.every(s=>s.done)) t.done=true; else t.done=false; 
+                app.data.save(); 
+            }
         },
         togList(id) { const t = this.find(id); if(t) { t.expanded = !t.expanded; app.data.save(); } },
         del(id) {
@@ -721,6 +1119,7 @@ const app = {
                 const rIdx = app.state.recurring.findIndex(t => t.id === id);
                 if(rIdx !== -1) app.state.recurring.splice(rIdx, 1);
                 if(app.state.tasks[app.viewDate]) app.state.tasks[app.viewDate] = app.state.tasks[app.viewDate].filter(t => (t.realId || t.id) !== id);
+                app.audio.play('error');
                 app.data.save();
             }
         },
@@ -799,6 +1198,71 @@ const app = {
             if(app.state.tasks) Object.values(app.state.tasks).flat().forEach(t => { if(t.done) sum += t.points; });
             return sum;
         },
+        
+        // --- ЛОГИКА "ЖИВОГО СЕРДЦА" ---
+        // --- УМНОЕ ЖИВОЕ СЕРДЦЕ ---
+        renderBlob() {
+            const blob = document.getElementById('blob');
+            if(!blob) return;
+            
+            const date = new Date().toISOString().split('T')[0];
+            
+            // 1. Сбор данных
+            const mood = app.state.moods[date] || 3; // 1..5
+            const tasks = app.state.tasks[date] || [];
+            const points = tasks.filter(t=>t.done).reduce((a,b)=>a+b.points,0);
+            
+            const fins = app.state.finances.filter(f => f.date === date);
+            const income = fins.filter(f=>f.type==='income').reduce((a,b)=>a+b.amount,0);
+            const expense = fins.filter(f=>f.type==='expense').reduce((a,b)=>a+b.amount,0);
+
+            // Базовый цвет от настроения
+            const colors = {1:'#ff7675', 2:'#fdcb6e', 3:'#b2bec3', 4:'#74b9ff', 5:'#6c5ce7'};
+            blob.style.background = colors[mood];
+            blob.className = 'living-blob'; // Сброс классов
+            
+            // --- ЛОГИКА СОСТОЯНИЙ (Приоритеты) ---
+
+            // 1. ФОКУС (Высший приоритет)
+            // Проверяем, работает ли таймер в режиме "Работа"
+            if (app.timer && app.timer.isRunning && app.timer.mode === 'work') {
+                blob.classList.add('blob-shield');
+                blob.title = "Режим Фокуса: Активен";
+                return; 
+            }
+
+            // 2. ФИНАНСОВАЯ ПАНИКА (Если потратил больше, чем заработал сегодня, и расходы > 0)
+            // (Или можно задать жесткий лимит, например > 1000)
+            if (expense > income && expense > 0) {
+                blob.classList.add('blob-panic');
+                blob.title = "Тревога: Расходы превышают доходы!";
+                return;
+            }
+
+            // 3. ДЕПРЕССИЯ (Плохое настроение)
+            if (mood <= 2) {
+                blob.classList.add('blob-sad');
+                blob.title = "Низкий заряд энергии";
+                return;
+            }
+
+            // 4. ПРОДУКТИВНОСТЬ (Обычное состояние)
+            if (points > 30) {
+                blob.classList.add('blob-power'); // Мощный
+                blob.title = "Ты в потоке!";
+            } else {
+                // Обычное состояние (просто живет)
+                blob.title = "Пульс в норме";
+            }
+        },
+
+        // --- КОНФЕТТИ ---
+        triggerConfetti() {
+            // Запускаем салют из двух нижних углов
+            confetti({ particleCount: 60, spread: 55, origin: { x: 0, y: 1 }, colors: ['#6c5ce7', '#00b894'] });
+            confetti({ particleCount: 60, spread: 55, origin: { x: 1, y: 1 }, colors: ['#6c5ce7', '#fdcb6e'] });
+        },
+
         setFilter(mode, el) {
             const p = document.getElementById('custom-date-panel');
             if(mode === 'custom') { p.classList.remove('hidden'); p.style.display='flex'; } 
@@ -811,20 +1275,28 @@ const app = {
             if (p.classList.contains('hidden')) { p.classList.remove('hidden'); p.style.display='flex'; } else { p.classList.add('hidden'); p.style.display='none'; }
         },
         updateAll() {
-            this.renderStats(); this.renderTasks(); this.renderWallet(); this.renderGoals(); this.renderAch();
+            this.renderStats(); 
+            this.renderTasks(); 
+            this.renderWallet(); 
+            this.renderGoals(); 
+            this.renderAch();
+            this.renderBlob(); // Обновляем блоб
             if(app.shop) app.shop.render();
+            if(app.mood) app.mood.render();
         },
+        
+        // ... (Остальные методы renderStats, renderTasks и др. остаются без изменений, 
+        // но лучше скопируй их из прошлого файла, если они не поместились)
+        
         renderStats() {
             const fins = app.finance.getFiltered();
             const targetCurr = app.state.settings.currency;
             let inc = 0, exp = 0;
             const expByCat = {}; 
-            
             fins.forEach(f => {
                 const v = (f.amount / app.rates[f.curr]) * app.rates[targetCurr];
                 if(f.type === 'income') { inc += v; } else { exp += v; expByCat[f.cat] = (expByCat[f.cat] || 0) + v; }
             });
-            
             const sym = app.syms[targetCurr];
             const balance = inc - exp;
             
@@ -900,10 +1372,8 @@ const app = {
                 });
                 const delBtn = `<button class="btn-toggle" style="color:var(--danger); font-size:1.4rem; padding:0 5px; line-height:1;" onclick="app.tasks.del(${id})">×</button>`;
                 
-                // --- НОВАЯ КРАСИВАЯ КНОПКА ФОКУСА ---
                 let timerBtn = '';
                 if (t.cat === 'Работа' || t.cat === 'Фокус') {
-                    // Используем replace, чтобы кавычки в тексте задачи не ломали код
                     const safeText = t.text.replace(/'/g, "");
                     timerBtn = `<button class="btn-focus" onclick="app.timer.open('${safeText}')">⏱ Фокус</button>`;
                 }
@@ -1030,11 +1500,16 @@ const app = {
             document.body.setAttribute('data-theme', app.state.settings.theme);
             app.data.save();
         }
-    },
+    }, // Закрываем ui
+
+    // ВОТ ЭТОГО БЛОКА НЕ ХВАТАЛО:
     settings: {
         save() { app.state.settings.currency = document.getElementById('sets-curr').value; app.data.save(); }
     }
-};
+
+}; // Закрываем весь объект app (ЭТОЙ СКОБКИ НЕ БЫЛО)
+
+// Запуск
 window.onload = () => app.init();
 </script>
 </body>
