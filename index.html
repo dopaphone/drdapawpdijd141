@@ -419,32 +419,38 @@
 <div id="tab-wallet" class="container tab-content">
     <div class="wallet-card wallet-inc">
         <h3>💰 Доход</h3>
-        <div style="margin-top: 10px; display: flex; gap: 5px;">
-            <input type="number" id="inc-sum" placeholder="0.00" style="background: rgba(255,255,255,0.2); color: white; border: none; margin: 0;">
-            <button class="btn" style="background: white; color: var(--success);" onclick="app.finance.add('income')">OK</button>
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="inc-sum" placeholder="0.00" style="background: rgba(255,255,255,0.25); color: white; border: none; margin: 0; font-weight: bold; flex: 1;">
+                <button class="btn" style="background: white; color: var(--success); border: none; width: 60px; font-weight: 900;" onclick="app.finance.add('income')">OK</button>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <select id="inc-cat" style="background: rgba(255,255,255,0.15); color: white; border: none; margin: 0; flex: 1;">
+                    </select>
+                <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: none; width: 50px; padding: 0;" onclick="app.finance.addCat('income')">+</button>
+            </div>
+
+            <input type="text" id="inc-note" placeholder="Комментарий (необязательно)" style="background: rgba(255,255,255,0.15); color: white; border: none; margin: 0; font-size: 0.85rem; height: 40px;">
         </div>
-        <select id="inc-cat" style="margin-top: 5px; background: rgba(255,255,255,0.2); color: white; border: none;">
-            <option style="color:black" value="Зарплата">Зарплата</option>
-            <option style="color:black" value="Фриланс">Фриланс</option>
-            <option style="color:black" value="Перевод">Перевод</option>
-            <option style="color:black" value="Другое">Другое</option>
-        </select>
     </div>
     
     <div class="wallet-card wallet-exp">
         <h3>💸 Расход</h3>
-        <div style="margin-top: 10px; display: flex; gap: 5px;">
-            <input type="number" id="exp-sum" placeholder="0.00" style="background: rgba(255,255,255,0.2); color: white; border: none; margin: 0;">
-            <button class="btn" style="background: white; color: var(--danger);" onclick="app.finance.add('expense')">OK</button>
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="exp-sum" placeholder="0.00" style="background: rgba(255,255,255,0.25); color: white; border: none; margin: 0; font-weight: bold; flex: 1;">
+                <button class="btn" style="background: white; color: var(--danger); border: none; width: 60px; font-weight: 900;" onclick="app.finance.add('expense')">OK</button>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <select id="exp-cat" style="background: rgba(255,255,255,0.15); color: white; border: none; margin: 0; flex: 1;">
+                    </select>
+                <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: none; width: 50px; padding: 0;" onclick="app.finance.addCat('expense')">+</button>
+            </div>
+
+            <input type="text" id="exp-note" placeholder="Комментарий (необязательно)" style="background: rgba(255,255,255,0.15); color: white; border: none; margin: 0; font-size: 0.85rem; height: 40px;">
         </div>
-        <select id="exp-cat" style="margin-top: 5px; background: rgba(255,255,255,0.2); color: white; border: none;">
-            <option style="color:black" value="Еда">Еда</option>
-            <option style="color:black" value="Сигареты">🚬 Сигареты</option>
-            <option style="color:black" value="Квартира">Квартира</option>
-            <option style="color:black" value="Досуг">Досуг</option>
-            <option style="color:black" value="Транспорт">Транспорт</option>
-            <option style="color:black" value="Другое">Другое</option>
-        </select>
     </div>
 
     <div class="card" style="margin-top: 20px;">
@@ -462,25 +468,7 @@
                     <option value="expense">💸 Расходы</option>
                 </select>
             </div>
-
-            <select id="wallet-filter-cat" class="sort-select" style="width: 100%;" onchange="app.ui.renderWallet()">
-                <option value="all">📂 Все категории</option>
-                <option disabled>── Расходы ──</option>
-                <option value="Еда">Еда</option>
-                <option value="Сигареты">🚬 Сигареты</option>
-                <option value="Квартира">Квартира</option>
-                <option value="Развлечения">Развлечения</option>
-                <option value="Транспорт">Транспорт</option>
-                <option value="Здоровье">Здоровье</option>
-                <option value="Досуг">Досуг</option>
-                <option value="Другое">Другое</option>
-                <option disabled>── Доходы ──</option>
-                <option value="Зарплата">Зарплата</option>
-                <option value="Фриланс">Фриланс</option>
-                <option value="Перевод">Перевод</option>
-                <option value="Подарок">Подарок</option>
-            </select>
-        </div>
+            </div>
         
         <h3>История за период</h3>
         <div id="wallet-history"></div>
@@ -526,6 +514,7 @@
             <option value="EUR">EUR (€)</option>
             <option value="RUB">RUB (₽)</option>
             <option value="GEL">GEL (₾)</option>
+            <option value="KZT">KZT (₸)</option>
         </select>
         <button class="btn" style="width:100%; margin-top:10px;" onclick="app.ui.theme()">🌓 Тема</button>
         <br><br>
@@ -607,7 +596,12 @@ const app = {
         rewards: [], 
         spent: 0,
         achievements: {},
-        moods: {}, // Добавили хранение настроения
+        moods: {},
+        // НОВОЕ: Храним категории здесь
+        categories: {
+            income: ['Зарплата', 'Фриланс', 'Подарок', 'Кэшбек'],
+            expense: ['Еда', 'Дом', 'Транспорт', 'Здоровье', 'Досуг', 'Одежда', 'Подписки']
+        },
         settings: { currency: 'USD', theme: 'light' },
         filter: { start: '', end: '', mode: 'today' }
     },
@@ -700,11 +694,12 @@ const app = {
     },
     
     viewDate: new Date().toISOString().split('T')[0],
-    rates: { 'USD': 1, 'EUR': 0.92, 'GEL': 2.75, 'RUB': 90 },
-    syms: { 'USD': '$', 'EUR': '€', 'GEL': '₾', 'RUB': '₽' },
+    rates: { 'USD': 1, 'EUR': 0.92, 'GEL': 2.75, 'RUB': 90, 'KZT': 500 },
+    syms: { 'USD': '$', 'EUR': '€', 'GEL': '₾', 'RUB': '₽', 'KZT': '₸' },
 
     init() {
         this.data.load();
+        this.finance.renderCats(); // ВАЖНО: Рисуем категории при старте
         this.ui.setFilter('today', document.querySelector('.filter-chip.active'));
         this.achievements.gen();
         document.body.setAttribute('data-theme', this.state.settings.theme);
@@ -717,9 +712,13 @@ const app = {
             if(d) {
                 const parsed = JSON.parse(d);
                 app.state = {...app.state, ...parsed};
-                if(!app.state.rewards) app.state.rewards = [];
-                if(!app.state.spent) app.state.spent = 0;
-                if(!app.state.moods) app.state.moods = {};
+                // Если у пользователя старая версия без категорий - создаем дефолтные
+                if(!app.state.categories) {
+                    app.state.categories = {
+                        income: ['Зарплата', 'Фриланс', 'Подарок'],
+                        expense: ['Еда', 'Дом', 'Транспорт', 'Здоровье', 'Досуг']
+                    };
+                }
             }
             document.getElementById('sets-curr').value = app.state.settings.currency;
         },
@@ -747,16 +746,51 @@ const app = {
     },
 
     finance: {
+        // Отрисовка выпадающих списков
+        renderCats() {
+            const incSel = document.getElementById('inc-cat');
+            const expSel = document.getElementById('exp-cat');
+            if(!incSel || !expSel) return;
+            
+            // Чистим и заполняем
+            incSel.innerHTML = app.state.categories.income.map(c => `<option style="color:black" value="${c}">${c}</option>`).join('');
+            expSel.innerHTML = app.state.categories.expense.map(c => `<option style="color:black" value="${c}">${c}</option>`).join('');
+        },
+
+        // Добавление новой категории
+        addCat(type) {
+            const name = prompt('Название новой категории:');
+            if (name) {
+                app.state.categories[type].push(name);
+                this.renderCats(); // Перерисовываем списки
+                // Автоматически выбираем новую категорию
+                const sel = document.getElementById(type === 'income' ? 'inc-cat' : 'exp-cat');
+                sel.value = name;
+                app.data.save();
+            }
+        },
+
+        // Добавление операции (С КОММЕНТАРИЕМ)
         add(type) {
             const s = document.getElementById(type==='income'?'inc-sum':'exp-sum');
             const c = document.getElementById(type==='income'?'inc-cat':'exp-cat');
+            const n = document.getElementById(type==='income'?'inc-note':'exp-note'); // Поле коммента
+            
             const val = parseFloat(s.value);
             if(!val) return;
+            
             app.state.finances.push({
-                id: Date.now(), date: new Date().toISOString().split('T')[0],
-                type, amount: val, cat: c.value, curr: app.state.settings.currency
+                id: Date.now(), 
+                date: new Date().toISOString().split('T')[0],
+                type, 
+                amount: val, 
+                cat: c.value, 
+                note: n.value || '', // Сохраняем комментарий
+                curr: app.state.settings.currency
             });
+            
             s.value = '';
+            n.value = ''; // Чистим поле коммента
             app.data.save();
         },
         getFiltered() { return app.state.finances.filter(f => app.filter.inRange(f.date)); }
@@ -1457,10 +1491,10 @@ const app = {
             const cont = document.getElementById('wallet-history'); 
             cont.innerHTML = '';
             let list = app.finance.getFiltered();
+            
+            // Сортировка и фильтры (оставляем старую логику сортировки)
             const typeFilter = document.getElementById('wallet-filter-type')?.value || 'all';
             if (typeFilter !== 'all') list = list.filter(f => f.type === typeFilter);
-            const catFilter = document.getElementById('wallet-filter-cat')?.value || 'all';
-            if (catFilter !== 'all') list = list.filter(f => f.cat === catFilter);
             
             const sortMode = document.getElementById('wallet-sort')?.value || 'date-desc';
             list.sort((a, b) => {
@@ -1483,9 +1517,17 @@ const app = {
                 const sym = app.syms[app.state.settings.currency];
                 const col = f.type==='income'?'var(--success)':'var(--danger)';
                 const sign = f.type==='income'?'+':'-';
+                
+                // Рендер комментария (если есть)
+                const noteHtml = f.note ? `<div style="font-size:0.75rem; color:var(--text-sec); margin-top:2px;">${f.note}</div>` : '';
+
                 cont.innerHTML += `
                     <div class="history-item">
-                        <div><b>${f.cat}</b> <br> <small style="color:#aaa">${f.date}</small></div>
+                        <div>
+                            <b>${f.cat}</b> 
+                            ${noteHtml} 
+                            <small style="color:#aaa; font-size:0.7rem">${f.date}</small>
+                        </div>
                         <div style="text-align:right">
                             <div style="color:${col}; font-weight:bold">${sign} ${val.toFixed(0)} ${sym}</div>
                             <small style="opacity:0.5; font-size:0.7rem">${f.amount} ${app.syms[f.curr]}</small>
