@@ -1194,10 +1194,25 @@ const app = {
 
     ui: {
         calcTotalPoints() {
-            let sum = 0;
-            if(app.state.tasks) Object.values(app.state.tasks).flat().forEach(t => { if(t.done) sum += t.points; });
-            return sum;
-        },
+        let sum = 0;
+        if(app.state.tasks) {
+            // Получаем все задачи
+            const allTasks = Object.values(app.state.tasks).flat();
+            
+            // Фильтруем их по дате (используя текущий фильтр приложения)
+            // Задачи хранятся по ключам-датам, но для надежности перепроверим
+            // В твоей структуре tasks - это объект { "2023-10-01": [...], ... }
+            
+            Object.keys(app.state.tasks).forEach(date => {
+                if (app.filter.inRange(date)) { // Проверяем, попадает ли дата в фильтр
+                    app.state.tasks[date].forEach(t => {
+                        if(t.done) sum += t.points;
+                    });
+                }
+            });
+        }
+        return sum;
+    },
         
         // --- ЛОГИКА "ЖИВОГО СЕРДЦА" ---
         // --- УМНОЕ ЖИВОЕ СЕРДЦЕ ---
@@ -1289,71 +1304,106 @@ const app = {
         // но лучше скопируй их из прошлого файла, если они не поместились)
         
         renderStats() {
-            const fins = app.finance.getFiltered();
-            const targetCurr = app.state.settings.currency;
-            let inc = 0, exp = 0;
-            const expByCat = {}; 
-            fins.forEach(f => {
-                const v = (f.amount / app.rates[f.curr]) * app.rates[targetCurr];
-                if(f.type === 'income') { inc += v; } else { exp += v; expByCat[f.cat] = (expByCat[f.cat] || 0) + v; }
-            });
-            const sym = app.syms[targetCurr];
-            const balance = inc - exp;
-            
-            document.getElementById('balance-display').innerText = balance.toFixed(0) + ' ' + sym;
-            document.getElementById('balance-display').style.color = balance >= 0 ? 'var(--text-main)' : 'var(--danger)';
-            document.getElementById('stat-inc').innerText = inc.toFixed(0) + ' ' + sym;
-            document.getElementById('stat-exp').innerText = exp.toFixed(0) + ' ' + sym;
-            document.querySelectorAll('.curr').forEach(e => e.innerText = sym);
-            
-            document.getElementById('streak-val').innerText = app.achievements.check();
-            document.getElementById('total-points-display').innerText = app.ui.calcTotalPoints();
+        // А. СЧИТАЕМ ОБЩИЙ БАЛАНС (ЗА ВСЕ ВРЕМЯ)
+        const allFins = app.state.finances; // Берем вообще все записи
+        const targetCurr = app.state.settings.currency;
+        let totalBalance = 0;
+        
+        allFins.forEach(f => {
+            const v = (f.amount / app.rates[f.curr]) * app.rates[targetCurr];
+            if(f.type === 'income') totalBalance += v; 
+            else totalBalance -= v;
+        });
 
-            // Charts
-            const days = []; for(let k=6; k>=0; k--) { const d=new Date(); d.setDate(d.getDate()-k); days.push(d.toISOString().split('T')[0]); }
-            const ce = document.getElementById('chart-energy'); ce.innerHTML = '';
-            const cf = document.getElementById('chart-finance'); cf.innerHTML = '';
-            
-            let maxFin = 100;
-            days.forEach(d => {
-                 const df = app.state.finances.filter(f=>f.date===d);
-                 let di=0, de=0;
-                 df.forEach(f=>{ const v=(f.amount/app.rates[f.curr])*app.rates[targetCurr]; if(f.type==='income') di+=v; else de+=v; });
-                 if(di>maxFin) maxFin=di; if(de>maxFin) maxFin=de;
-            });
-            
-            let maxPts = 10;
-            const ppd = days.map(d => (app.state.tasks[d]||[]).filter(t=>t.done).reduce((a,b)=>a+b.points,0));
-            maxPts = Math.max(10, ...ppd);
-
-            days.forEach((d, i) => {
-                const pt = ppd[i];
-                ce.innerHTML += `<div class="bar-col"><div class="bar" style="height:${(pt/maxPts)*100}%; background:var(--primary)"></div></div>`;
-                const df = app.state.finances.filter(f=>f.date===d);
-                let di=0, de=0;
-                df.forEach(f=>{ const v=(f.amount/app.rates[f.curr])*app.rates[targetCurr]; if(f.type==='income') di+=v; else de+=v; });
-                cf.innerHTML += `<div class="bar-col"><div style="display:flex; align-items:flex-end; gap:2px; height:100%; width:100%; justify-content:center"><div class="bar" style="width:12px; background:var(--success); height:${(di/maxFin)*100}%"></div><div class="bar" style="width:12px; background:var(--danger); height:${(de/maxFin)*100}%"></div></div></div>`;
-            });
-
-            // Pie Chart
-            const pieContainer = document.getElementById('expense-pie-chart-wrapper');
-            if (exp === 0) { pieContainer.innerHTML = 'Нет расходов'; } else {
-                const sortedCats = Object.entries(expByCat).sort((a, b) => b[1] - a[1]);
-                const colors = ['#ff7675', '#74b9ff', '#55efc4', '#a29bfe', '#fdcb6e', '#e17055', '#00b894', '#636e72'];
-                let gradientStr = ''; let startPerc = 0; let legendHtml = '';
-                sortedCats.forEach((item, index) => {
-                    const [catName, amount] = item;
-                    const perc = (amount / exp) * 100;
-                    const endPerc = startPerc + perc;
-                    const color = colors[index % colors.length];
-                    gradientStr += `${color} ${startPerc}% ${endPerc}%, `;
-                    startPerc = endPerc;
-                    legendHtml += `<div class="legend-item"><div class="legend-color" style="background:${color}"></div><span>${catName}: <b>${amount.toFixed(0)}</b> (${perc.toFixed(0)}%)</span></div>`;
-                });
-                gradientStr = gradientStr.slice(0, -2);
-                pieContainer.innerHTML = `<div class="pie-chart-container"><div class="pie-chart" style="background: conic-gradient(${gradientStr})"></div><div class="chart-legend">${legendHtml}</div></div>`;
+        // Б. СЧИТАЕМ СТАТИСТИКУ ЗА ПЕРИОД (ДЛЯ СТРЕЛОЧЕК И ГРАФИКА)
+        const filteredFins = app.finance.getFiltered(); // Берем записи по фильтру
+        let periodInc = 0, periodExp = 0;
+        const expByCat = {}; 
+        
+        filteredFins.forEach(f => {
+            const v = (f.amount / app.rates[f.curr]) * app.rates[targetCurr];
+            if(f.type === 'income') { 
+                periodInc += v; 
+            } else { 
+                periodExp += v; 
+                expByCat[f.cat] = (expByCat[f.cat] || 0) + v; 
             }
-        },
+        });
+
+        const sym = app.syms[targetCurr];
+        
+        // ВЫВОД НА ЭКРАН
+        
+        // 1. Общий баланс (Всегда актуальный кошелек)
+        const balEl = document.getElementById('balance-display');
+        balEl.innerText = totalBalance.toFixed(0) + ' ' + sym;
+        balEl.style.color = totalBalance >= 0 ? 'var(--text-main)' : 'var(--danger)';
+        
+        // 2. Доход/Расход за выбранный период (Маленькие цифры)
+        document.getElementById('stat-inc').innerText = periodInc.toFixed(0) + ' ' + sym;
+        document.getElementById('stat-exp').innerText = periodExp.toFixed(0) + ' ' + sym;
+        
+        // 3. Валюта в заголовках
+        document.querySelectorAll('.curr').forEach(e => e.innerText = sym);
+        
+        // 4. Баллы и Стрик
+        document.getElementById('streak-val').innerText = app.achievements.check();
+        document.getElementById('total-points-display').innerText = app.ui.calcTotalPoints(); // Теперь вызовет новую логику
+
+        // ГРАФИКИ (Остаются без изменений, строятся по фильтру/неделе)
+        const days = []; 
+        for(let k=6; k>=0; k--) { 
+            const d=new Date(); d.setDate(d.getDate()-k); 
+            days.push(d.toISOString().split('T')[0]); 
+        }
+        
+        const ce = document.getElementById('chart-energy'); ce.innerHTML = '';
+        const cf = document.getElementById('chart-finance'); cf.innerHTML = '';
+        
+        // Логика графиков (оставляем как есть, она нормальная для обзора недели)
+        let maxFin = 100;
+        days.forEach(d => {
+             const df = app.state.finances.filter(f=>f.date===d);
+             let di=0, de=0;
+             df.forEach(f=>{ const v=(f.amount/app.rates[f.curr])*app.rates[targetCurr]; if(f.type==='income') di+=v; else de+=v; });
+             if(di>maxFin) maxFin=di; if(de>maxFin) maxFin=de;
+        });
+        
+        let maxPts = 10;
+        // Тут тоже баллы считаем по дням для графика
+        const ppd = days.map(d => (app.state.tasks[d]||[]).filter(t=>t.done).reduce((a,b)=>a+b.points,0));
+        maxPts = Math.max(10, ...ppd);
+
+        days.forEach((d, i) => {
+            const pt = ppd[i];
+            ce.innerHTML += `<div class="bar-col"><div class="bar" style="height:${(pt/maxPts)*100}%; background:var(--primary)"></div></div>`;
+            const df = app.state.finances.filter(f=>f.date===d);
+            let di=0, de=0;
+            df.forEach(f=>{ const v=(f.amount/app.rates[f.curr])*app.rates[targetCurr]; if(f.type==='income') di+=v; else de+=v; });
+            cf.innerHTML += `<div class="bar-col"><div style="display:flex; align-items:flex-end; gap:2px; height:100%; width:100%; justify-content:center"><div class="bar" style="width:12px; background:var(--success); height:${(di/maxFin)*100}%"></div><div class="bar" style="width:12px; background:var(--danger); height:${(de/maxFin)*100}%"></div></div></div>`;
+        });
+
+        // Круговая диаграмма (по периоду)
+        const pieContainer = document.getElementById('expense-pie-chart-wrapper');
+        if (periodExp === 0) { pieContainer.innerHTML = 'Нет расходов за период'; } else {
+            const sortedCats = Object.entries(expByCat).sort((a, b) => b[1] - a[1]);
+            const colors = ['#F87171', '#60A5FA', '#34D399', '#A78BFA', '#FBBF24', '#FB923C', '#22D3EE', '#9CA3AF'];
+            let gradientStr = ''; let startPerc = 0; let legendHtml = '';
+            
+            sortedCats.forEach((item, index) => {
+                const [catName, amount] = item;
+                const perc = (amount / periodExp) * 100;
+                const endPerc = startPerc + perc;
+                const color = colors[index % colors.length];
+                gradientStr += `${color} ${startPerc}% ${endPerc}%, `;
+                startPerc = endPerc;
+                legendHtml += `<div class="legend-item"><div class="legend-color" style="background:${color}"></div><span>${catName}: <b>${amount.toFixed(0)}</b> (${perc.toFixed(0)}%)</span></div>`;
+            });
+            
+            gradientStr = gradientStr.slice(0, -2);
+            pieContainer.innerHTML = `<div class="pie-chart-container"><div class="pie-chart" style="background: conic-gradient(${gradientStr})"></div><div class="chart-legend">${legendHtml}</div></div>`;
+        }
+    },
         
         renderTasks() {
             document.getElementById('task-date-label').innerText = app.viewDate;
